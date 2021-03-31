@@ -1,0 +1,18 @@
+demo:
+  dir: C:\tmp\test
+#mysql config
+spring:
+  datasource:
+    username: root
+    password: 0883
+    url: jdbc:mysql://127.0.0.1:3306/springboot_demo_test
+    driver-class-name: com.mysql.jdbc.Driver
+
+  servlet:
+    multipart:
+      max-file-size: 2000MB
+      max-request-size: 5000MB
+#entity-mapper relations config
+mybatis:
+  mapper-locations:  classpath:mapping/*.xml
+  type-aliases-package: com.demo.test.model

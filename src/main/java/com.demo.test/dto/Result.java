@@ -21,7 +21,7 @@ public class Result<T> {
         return new Result(1, "success", data);
     }
 
-    public Result fail(){
+    public static Result fail(){
         return new Result(2, "fail", null);
     }
     public Result(String message, T data){
