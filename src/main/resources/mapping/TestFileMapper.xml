@@ -11,5 +11,9 @@
         <result column="end_time" property="endTime" jdbcType="VARCHAR"/>
         <result column="run_time" property="runTime" jdbcType="VARCHAR"/>
     </resultMap>
+    <insert id="addFile" parameterType="com.demo.test.model.TestFile">
+        INSERT INTO test_file(file_id,file_name,file_type,file_path,upload_time,end_time,run_time)
+        VALUES(#{fileId,jdbcType=VARCHAR},#{fileName,jdbcType=VARCHAR},#{fileType,jdbcType=INTEGER},#{filePath,jdbcType=VARCHAR},#{uploadTime,jdbcType=VARCHAR},#{endTime,jdbcType=VARCHAR},#{runTime,jdbcType=VARCHAR});
+    </insert>
 
 </mapper>
