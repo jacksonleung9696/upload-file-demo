@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -35,6 +36,9 @@ public class UploadFileServiceImpl implements UploadFileService {
 
     @Resource
     private TestFileMapper fileMapper;
+
+    @Resource
+    private RestTemplate restTemplate;
 
     @Override
     public Result upload(int fileType, MultipartFile multipartFile, String url) {
@@ -81,6 +85,7 @@ public class UploadFileServiceImpl implements UploadFileService {
     }
 
     private void uploadByUrl(String url, String uuid){
+        byte[] bytes =  restTemplate.getForObject(url, byte[].class);
 
     }
 }
