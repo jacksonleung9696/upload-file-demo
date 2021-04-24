@@ -48,6 +48,9 @@ public class UploadFileServiceImpl implements UploadFileService {
         if (url.length() == 0) {
             LOGGER.info("url is empty, it will upload by multipart");
             map = uploadByMultipart(multipartFile, uuid);
+            if (map.containsKey("fileSize") && ConvertObjType.convert(map.get("fileSize")).equals("failed")) {
+                return Result.fail("file size is too large");
+            }
         } else {
             LOGGER.info("url exist, it will download by url");
         }
@@ -72,13 +75,19 @@ public class UploadFileServiceImpl implements UploadFileService {
         Integer index = fileName.lastIndexOf(".");
         String destName = rootDir + "/" + uuid + "/" + fileName;
         File file = new File(destName);
+        LOGGER.info("file length: {}",file.length());
+        Map<String, Object> map = new HashMap<>(16);
+        if (file.length() > 1024) {
+            map.put("fileSize","failed");
+            return map;
+        }
         FilePathUtils.createFilePath(file);
         try {
             multipartFile.transferTo(file);
         } catch (IOException e) {
             LOGGER.error("file transfer occur error: {}", e);
         }
-        Map<String, Object> map = new HashMap<>(16);
+
         map.put("fileName", fileName);
         map.put("destName", destName);
         return map;
