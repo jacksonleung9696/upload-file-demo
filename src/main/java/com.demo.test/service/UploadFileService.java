@@ -17,5 +17,5 @@ public interface UploadFileService {
      * @param url 路径
      * @return 返回result对象
      */
-    Result upload(int fileType, MultipartFile multipartFile, String url);
+    Result upload(int fileType, MultipartFile multipartFile, String url) throws Exception;
 }

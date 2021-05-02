@@ -7,16 +7,19 @@ import com.demo.test.service.UploadFileService;
 import com.demo.test.utils.ConvertObjType;
 import com.demo.test.utils.FilePathUtils;
 import com.demo.test.utils.UniqueIdUtils;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
@@ -41,14 +44,14 @@ public class UploadFileServiceImpl implements UploadFileService {
     private RestTemplate restTemplate;
 
     @Override
-    public Result upload(int fileType, MultipartFile multipartFile, String url) {
+    public Result upload(int fileType, MultipartFile multipartFile, String url) throws Exception {
         String uuid = UniqueIdUtils.create10UUID();
         Map<String, Object> map = new HashMap<>(16);
         LocalDateTime startTime = LocalDateTime.now();
         if (url.length() == 0) {
             LOGGER.info("url is empty, it will upload by multipart");
             map = uploadByMultipart(multipartFile, uuid);
-            if (map.containsKey("fileSize") && ConvertObjType.convert(map.get("fileSize")).equals("failed")) {
+            if (map.containsKey("fileSize") && ConvertObjType.convert(map.get("fileSize")).equals("large")) {
                 return Result.fail("file size is too large");
             }
         } else {
@@ -70,15 +73,14 @@ public class UploadFileServiceImpl implements UploadFileService {
         return new Result("success", uuid);
     }
 
-    private Map<String, Object> uploadByMultipart(MultipartFile multipartFile, String uuid){
+    private Map<String, Object> uploadByMultipart(MultipartFile multipartFile, String uuid) throws Exception {
         String fileName = multipartFile.getOriginalFilename();
         Integer index = fileName.lastIndexOf(".");
         String destName = rootDir + "/" + uuid + "/" + fileName;
         File file = new File(destName);
-        LOGGER.info("file length: {}",file.length());
         Map<String, Object> map = new HashMap<>(16);
-        if (file.length() > 1024) {
-            map.put("fileSize","failed");
+        if(!judgeFileSize(multipartFile)) {
+            map.put("fileSize", "large");
             return map;
         }
         FilePathUtils.createFilePath(file);
@@ -93,8 +95,29 @@ public class UploadFileServiceImpl implements UploadFileService {
         return map;
     }
 
-    private void uploadByUrl(String url, String uuid){
-        byte[] bytes =  restTemplate.getForObject(url, byte[].class);
+    private void uploadByUrl(String url, String uuid) {
+        byte[] bytes = restTemplate.getForObject(url, byte[].class);
 
+    }
+
+    public Boolean judgeFileSize(MultipartFile file) throws Exception {
+        Boolean flag = true;
+        LOGGER.info("file.getSize: {}", file.getSize());
+        int fileS = file.getBytes().length;
+        LOGGER.info("fileS: {}", fileS);
+        DecimalFormat df = new DecimalFormat("#.00");
+        if (fileS < 1024*1024*1024) {
+            String size = df.format((double) fileS / 1048576);
+            LOGGER.info("size: {}", size);
+            // Integer intSize = Integer;
+            if (size != null) {
+                Double intSize = Double.parseDouble(size.trim());
+                //获取配置文件中的文件最大限制
+                if (intSize > 1024*6) {  // 不能上传超过10M的文件!
+                    flag = false;
+                }
+            }
+        }
+        return flag;
     }
 }

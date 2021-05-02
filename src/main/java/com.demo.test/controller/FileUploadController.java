@@ -26,7 +26,7 @@ public class FileUploadController {
     private UploadFileService uploadFileService;
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public Result uploadFile(@RequestParam("fileType") int fileType, @RequestParam("file") MultipartFile multipartFile, @RequestParam("url") String url) {
+    public Result uploadFile(@RequestParam("fileType") int fileType, @RequestParam("file") MultipartFile multipartFile, @RequestParam("url") String url) throws Exception {
         LOGGER.info("incoming params is: {}, {}, {}", fileType, multipartFile, url);
         return uploadFileService.upload(fileType, multipartFile, url);
     }
